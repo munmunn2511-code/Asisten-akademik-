@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>✨ Markas Admin ✨</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:14px;font:500 15px/1.5 system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#3b1d63;min-height:100vh;
+background:linear-gradient(135deg,#ffd6f5,#d6e4ff,#d4fff0,#fff3c4);background-size:300% 300%;animation:bg 12s ease infinite}
+@keyframes bg{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+@keyframes wob{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.wrap{max-width:760px;margin:auto}
+h1{margin:6px 0 2px;font-size:28px;text-align:center;background:linear-gradient(90deg,#ff3d9a,#7a5cff,#00b8d9,#ffb400);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(2px 2px 0 #fff)}
+.tag{text-align:center;margin:0 0 14px;font-size:13px}
+.card{background:#fff;border:3px solid #3b1d63;border-radius:20px;padding:12px;margin:12px 0;box-shadow:5px 5px 0 #3b1d63;animation:pop .3s}
+.card.ban{background:#ffe3e3;border-color:#d4183d;box-shadow:5px 5px 0 #d4183d}
+input{width:100%;padding:12px 14px;border:3px solid #3b1d63;border-radius:99px;font:inherit;background:#fff;color:#3b1d63;outline:0}
+input:focus{box-shadow:0 0 0 4px #ffb400}
+button{font:inherit;font-weight:700;letter-spacing:.2px;padding:9px 16px;border:3px solid #3b1d63;border-radius:99px;background:#7a5cff;color:#fff;cursor:pointer;box-shadow:3px 3px 0 #3b1d63;transition:.15s}
+button:hover{animation:wob .4s infinite}button:active{transform:translate(3px,3px);box-shadow:none}
+button.r{background:#ff3d6e}button.g{background:#00c389}button.x{background:#fff;color:#3b1d63}button.off{background:#fff;color:#3b1d63;box-shadow:none}
+.stats{display:flex;gap:8px;margin:10px 0}.st{flex:1;text-align:center;padding:8px 4px;border:3px solid #3b1d63;border-radius:18px;background:#fff;font-weight:700;box-shadow:3px 3px 0 #3b1d63}
+.st b{display:block;font-size:22px}.st:nth-child(1){background:#d6e4ff}.st:nth-child(2){background:#ffd6d6}.st:nth-child(3){background:#fff3c4}
+.id{font-family:ui-monospace,monospace;font-weight:900;font-size:17px;letter-spacing:.5px}
+.sub{font-size:13px;opacity:.9;word-break:break-all;margin-top:4px}
+.b{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700;margin:3px 4px 0 0;border:2px solid #3b1d63;background:#fff}
+.b.red{background:#ff3d6e;color:#fff}.b.amb{background:#ffb400}.b.grn{background:#00c389;color:#fff}.b.blu{background:#9fd0ff}.b.pnk{background:#ffb3e6}
+.row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.tabs{display:flex;gap:8px;margin:12px 0}.tabs button{flex:1}
+.hide{display:none}#msg{color:#d4183d;font-weight:700;text-align:center;margin:8px 0}
+</style>
+</head>
+<body><div class="wrap">
+<h1>✨ MARKAS ADMIN ✨</h1>
+<p class="tag">🕵️ pantau akun, tangkap yang nakal, banned sekarang juga! 🚫</p>
+<div id="login" class="card"><input id="kode" type="password" placeholder="🔑 kode rahasia admin..." autocomplete="off"><div class="row"><button id="masuk">Masuk yuk 🚀</button></div></div>
+<div id="msg"></div>
+<div id="app" class="hide">
+  <div class="stats"><div class="st">👥<b id="s1">0</b>akun</div><div class="st">🚫<b id="s2">0</b>diblokir</div><div class="st">⚠️<b id="s3">0</b>percobaan</div></div>
+  <input id="cari" placeholder="🔍 cari nama / email / ID / IP / tipe HP">
+  <div class="tabs"><button id="t1">👥 Akun</button><button id="t2" class="off">⚠️ Akun Ganda</button><button id="seg" class="x" style="flex:0 0 auto">🔄</button></div>
+  <div id="l1"></div><div id="l2" class="hide"></div>
+</div>
+</div>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var KODE=sessionStorage.getItem('adm')||'',DATA={akun:[],percobaan:[]},TAB=1;
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function tgl(ms){return ms?new Date(ms).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'-'}
+function api(op,extra){return fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json','x-admin-code':KODE},body:JSON.stringify(Object.assign({op:op},extra||{}))}).then(function(r){return r.json().catch(function(){return{}}).then(function(d){if(!r.ok)throw new Error(d.pesan||('Kesalahan '+r.status));return d})})}
+function muat(){$('msg').textContent='';return api('list').then(function(d){DATA=d;$('login').classList.add('hide');$('app').classList.remove('hide');sessionStorage.setItem('adm',KODE);gambar()}).catch(function(e){$('msg').textContent='😵 '+e.message;$('app').classList.add('hide');$('login').classList.remove('hide');sessionStorage.removeItem('adm')})}
+function aksi(op,id,alasan){return api(op,{id:id,alasan:alasan}).then(muat).catch(function(e){$('msg').textContent='😵 '+e.message})}
+function tb(t,c,f){var b=el('button',c,t);b.onclick=f;return b}
+function ban(id){var al=prompt('Alasan blokir (boleh kosong):','akun ganda');if(al===null)return;aksi('ban',id,al)}
+function gambar(){
+  var q=$('cari').value.trim().toLowerCase(),l1=$('l1'),l2=$('l2');l1.textContent='';l2.textContent='';
+  $('s1').textContent=DATA.akun.length;$('s2').textContent=DATA.akun.filter(function(a){return a.banned}).length;$('s3').textContent=DATA.percobaan.length;
+  DATA.akun.filter(function(a){return !q||[a.id,a.name,a.email,a.kelas,a.ip,a.hp,a.browser].join(' ').toLowerCase().indexOf(q)>=0}).forEach(function(a){
+    var c=el('div','card'+(a.banned?' ban':''));c.appendChild(el('div','id',(a.banned?'🚫 ':'🎓 ')+a.id));
+    c.appendChild(el('div','',(a.name||'(nama kosong)')+(a.kelas?' · kelas '+a.kelas:'')));
+    c.appendChild(el('div','sub','📧 '+(a.email||'(pengguna lama, email kosong)')));
+    var bw=el('div');
+    bw.appendChild(a.banned?el('span','b red','DIBLOKIR'+(a.alasan?': '+a.alasan:'')):el('span','b grn','aktif ✅'));
+    bw.appendChild(el('span','b blu','📱 '+a.hp));
+    bw.appendChild(el('span','b pnk','🌐 '+a.browser+(a.os?' · '+a.os:'')));
+    if(a.serumah&&a.serumah.length)bw.appendChild(el('span','b amb','🛜 IP sama: '+a.serumah.join(', ')));
+    if(a.mirip&&a.mirip.length)bw.appendChild(el('span','b amb','👯 HP mirip: '+a.mirip.join(', ')));
+    c.appendChild(bw);
+    c.appendChild(el('div','sub','🗓 daftar '+tgl(a.dibuat)+' · terakhir '+tgl(a.terakhir)+' · dipakai '+(a.pakai||0)+'x · IP '+(a.ip||'-')+' · kode perangkat '+a.fp));
+    c.appendChild(el('div','sub','🔎 '+(a.ua||'-')));
+    var r=el('div','row');
+    r.appendChild(a.banned?tb('Buka blokir 😇','g',function(){aksi('unban',a.id)}):tb('BANNED! 🔨','r',function(){ban(a.id)}));
+    r.appendChild(tb('Hapus 🗑️','x',function(){if(confirm('Hapus '+a.id+'? Perangkatnya bisa daftar ulang.'))aksi('hapus',a.id)}));
+    c.appendChild(r);l1.appendChild(c)});
+  if(!l1.firstChild)l1.appendChild(el('div','card','Belum ada akun 🍃'));
+  DATA.percobaan.forEach(function(p){
+    var c=el('div','card');c.appendChild(el('div','id','🕵️ '+(p.sebab==='email'?'Email dipakai lagi!':'HP yang sama daftar lagi!')));
+    c.appendChild(el('div','',(p.name||'(tanpa nama)')+' · '+(p.email||'-')));
+    c.appendChild(el('div','sub','⏰ '+tgl(p.waktu)+' · mencoba ID '+p.id+' · IP '+(p.ip||'-')+' · kode perangkat '+p.fp));
+    var bw=el('div');bw.appendChild(el('span','b amb','bentrok dengan '+p.bentrokDengan+(p.namaBentrok?' ('+p.namaBentrok+')':'')));
+    if(p.diblokir)bw.appendChild(el('span','b red','akun itu sudah diblokir'));c.appendChild(bw);
+    if(DATA.akun.some(function(a){return a.id===p.bentrokDengan&&!a.banned})){var r=el('div','row');r.appendChild(tb('Banned '+p.bentrokDengan+' 🔨','r',function(){ban(p.bentrokDengan)}));c.appendChild(r)}
+    l2.appendChild(c)});
+  if(!l2.firstChild)l2.appendChild(el('div','card','Aman, belum ada yang nakal 😎'));
+  $('l1').classList.toggle('hide',TAB!==1);$('l2').classList.toggle('hide',TAB!==2);
+  $('t1').classList.toggle('off',TAB!==1);$('t2').classList.toggle('off',TAB!==2)}
+$('masuk').onclick=function(){KODE=$('kode').value;muat()};
+$('kode').onkeydown=function(e){if(e.key==='Enter'){KODE=$('kode').value;muat()}};
+$('cari').oninput=gambar;$('seg').onclick=muat;
+$('t1').onclick=function(){TAB=1;gambar()};$('t2').onclick=function(){TAB=2;gambar()};
+if(KODE)muat();
+})();
+</script>
+</body>
+</html>
