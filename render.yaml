@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: asisten-akademik
+    runtime: node
+    buildCommand: "echo ok"
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    disk:
+      name: data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ACCESS_CODE
+        sync: false
+      - key: ADMIN_CODE
+        sync: false
+      - key: TRUST_PROXY
+        value: "1"

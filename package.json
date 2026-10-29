@@ -1,0 +1,9 @@
+{
+  "name": "asisten-akademik-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Server Asisten Akademik: proxy AI dan pembaca link soal",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}
